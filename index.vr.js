@@ -56,6 +56,7 @@ const $styleTpl = {
     paddingLeft: 0.07,
     paddingRight: 0.07,
     paddingBottom: 0.03,
+    paddingTop: 0.03,
     maxWidth: 1.7,
     alignItems: 'stretch'
   }
@@ -108,7 +109,7 @@ export default class vrpanoexpo extends React.Component {
     this._cachedPanoSources = []
   }
 
-  _notfify = (msg, type) => {
+  _notify = (msg, type) => {
     switch (type) {
       case 'error': this.state.notiBoxColor = $styleTpl.palette.red
         break
@@ -123,8 +124,12 @@ export default class vrpanoexpo extends React.Component {
     if (!this.state.isNotiVisible) this.setState({ isNotiVisible: true })
   }
 
+  _hideNotifier = () => {
+    if (this.state.isNotiVisible) this.setState({ isNotiVisible: false })
+  }
+
   _fetchPanoImages = async () => {
-    this._notfify('loading panoramic gallery ...')
+    this._notify('loading panoramic gallery ...')
 
     try {
       let reqParams = {
@@ -157,25 +162,25 @@ export default class vrpanoexpo extends React.Component {
             })
           }
           this._panoGallery = response.data.photos
-          this._notfify('panoramic gallery loaded, you can now start!', 'info')
+          this._notify('panoramic gallery loaded, you can now start!', 'info')
         } else {
           console.warn('FlickrAPI:search: Humm, empty data fetched!')
-          this._notfify('Humm, empty data fetched, please try again!', 'warning')
+          this._notify('Humm, empty data fetched, please try again!', 'warning')
         }
       } else {
         console.error('FlickrAPI:search: Oops, request error! ', response.data.message)
-        this._notfify('Oops, fetching gallery error, please try again!', 'error')
+        this._notify('Oops, fetching gallery error, please try again!', 'error')
       }
       console.log(response.data)
     } catch (err) {
       console.error('FlickrAPI:search: Oops, connexion error! ', err)
-      this._notfify('Oops, connexion error!', 'error')
+      this._notify('Oops, connexion error!', 'error')
     }
   }
 
   _fetchRandomPanoImageURI = async () => {
     let panoGallery = this._panoGallery
-    if (this.state.isNotiVisible) this.setState({ isNotiVisible: false })
+    this._notify('loading next image ...')
 
     if (panoGallery) {
       let luckyPic = Math.floor(Math.random() * panoGallery.photo.length);
@@ -186,15 +191,15 @@ export default class vrpanoexpo extends React.Component {
           try {
             let response = await axios.get(FLICKR_API_BASE_URL, {
               params: {
-                method: "flickr.photos.getSizes",
+                method: 'flickr.photos.getSizes',
                 api_key: FLICKR_API_KEY,
                 photo_id: luckyPicInfo.id,
-                format: "json",
+                format: 'json',
                 nojsoncallback: 1
               }
             })
 
-            if (response.data.stat === "ok") {
+            if (response.data.stat === 'ok') {
               let luckyPicSizes = response.data.sizes
               // get largest image's size (can be very big for some and then timemore loading)
               // That said `three.js` seems to resize automatically big image (width > 8192px)
@@ -205,17 +210,17 @@ export default class vrpanoexpo extends React.Component {
               this._cachedPanoSources.push({ index: luckyPic, uri: luckyPicLink })
             } else {
               console.error('FlickrAPI:getSizes: Oops, request error! ', response.data.message)
-              this._notfify('Oops, fetching picture error, please try again!', 'error')
+              this._notify('Oops, fetching picture error, please try again!', 'error')
             }
             console.log(response.data)
           } catch (err) {
             console.error('FlickrAPI:getSizes: Oops, connexion error! ', err)
-            this._notfify('Oops, connexion error!', 'error')
+            this._notify('Oops, connexion error!', 'error')
           }
       } else {
         this.setState({ currentPanoSource: { uri: catchedPanoSource.uri } })
       }
-    } else this._notfify('Hola, waiting gallery to be loaded, maybe connexion issue!', 'warning')
+    } else this._notify('Hola, waiting gallery to be loaded, maybe connexion issue!', 'warning')
   }
 
   _displayNewPano = () => { 
@@ -225,7 +230,7 @@ export default class vrpanoexpo extends React.Component {
   }
 
   _manageInfoBox = () => { 
-    if (this.state.isNotiVisible) this.setState({ isNotiVisible: false })
+    this._hideNotifier()
     this.setState({ isLegendVisible: !this.state.isLegendVisible })
   }
 
@@ -236,7 +241,7 @@ export default class vrpanoexpo extends React.Component {
   render() {
     return (
       <View>
-        <Pano source={this.state.currentPanoSource}/>
+        <Pano source={this.state.currentPanoSource} onLoadEnd={() => {this._hideNotifier()}}/>
         <View
           style={[$styles.introBox, {
             transform: [{ translate: [0, 0, -3.5] }],
