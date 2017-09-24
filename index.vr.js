@@ -95,14 +95,15 @@ export default class vrpanoexpo extends React.Component {
 
     this.state = {
       btnPlayColor: $styleTpl.btn.backgroundColor,
+      btnHomeColor: $styleTpl.btn.backgroundColor,
       btnInfoColor: $styleTpl.palette.blueTrans,
       notiBoxColor: $styleTpl.palette.black,
       isIntroVisible: true,
       isNotiVisible: false,
       isLegendVisible: true,
       notiMessage: 'loading state ...',
-      lengendTitle: 'say hello to the world',
-      lengendContent: 'use these side buttons to navigate through awesome pictures, published by awesome people',
+      lengendTitle: 'welcome, say hello to the world!',
+      lengendContent: 'use these side buttons to navigate through awesome pictures, published by awesome people.',
       currentPanoSource: asset('chess-world.jpg')
     }
     this._panoGallery = null
@@ -224,6 +225,15 @@ export default class vrpanoexpo extends React.Component {
     } else this._notify('Hola, waiting gallery to be loaded, maybe connexion issue!', 'warning')
   }
 
+  _displayHomePano = () => { 
+    this._fetchPanoImages()
+    if (!this.state.isIntroVisible) this.setState({ isIntroVisible: true })
+    this.setState({ btnHomeColor: $styleTpl.palette.green })
+    this.setState({ currentPanoSource: asset('chess-world.jpg'), })
+    this.setState({ lengendTitle: 'say hello to the world!', })
+    this.setState({ lengendContent: 'use these side buttons to navigate through awesome pictures, published by awesome people.' })
+  }
+
   _displayNewPano = () => { 
     this._fetchRandomPanoImageURI()
     this.setState({ btnPlayColor: $styleTpl.palette.green })
@@ -260,13 +270,31 @@ export default class vrpanoexpo extends React.Component {
           }]}>
             &gt; explore panoramic pictures in virtual reality mode !
           </Text> 
+          <Text style={[$styles.textCenter, {
+            fontSize: 0.15,
+            fontWeight: '400'
+          }]}>
+            &lt; made with love by "weloobe" &gt; 
+          </Text> 
         </View>
         <View style={[$styles.rowBoxCenter, {
           layoutOrigin: [0.5, 0.5],
           width: 3,
           // backgroundColor: "#000",
-          transform: [{ translate: [0.7, 0, -2] }]
+          transform: [{ translate: [0.5, 0, -2] }]
         }]}>
+          <VrButton
+            style={[$styles.btnRounded, { 
+              backgroundColor: this.state.btnHomeColor,
+              }]}
+            onEnter={() => this.setState({ btnHomeColor: $styleTpl.palette.purpleTrans })}
+            onExit={() => this.setState({ btnHomeColor: $styleTpl.btn.backgroundColor })}
+            onClick={ this._displayHomePano }
+          >
+            <Text style={ $styles.btnText }>
+              H
+            </Text>
+          </VrButton>
           <VrButton
             style={[$styles.btnRounded, { 
               backgroundColor: this.state.btnPlayColor,
