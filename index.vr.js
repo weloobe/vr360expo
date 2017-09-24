@@ -281,7 +281,7 @@ export default class vrpanoexpo extends React.Component {
           layoutOrigin: [0.5, 0.5],
           width: 3,
           // backgroundColor: "#000",
-          transform: [{ translate: [0.5, 0, -2] }]
+          transform: [{ translate: [0.5, 0, -2.1] }]
         }]}>
           <VrButton
             style={[$styles.btnRounded, { 
