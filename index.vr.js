@@ -140,6 +140,7 @@ export default class vrpanoexpo extends React.Component {
         content_type: 1,
         per_page: 500,
         format: 'json',
+        extras: 'license, owner_name, last_update',
         nojsoncallback: 1
       }
       let response = await axios.get(FLICKR_API_BASE_URL, {
@@ -205,7 +206,7 @@ export default class vrpanoexpo extends React.Component {
               // That said `three.js` seems to resize automatically big image (width > 8192px)
               let luckyPicLink = luckyPicSizes.size[luckyPicSizes.size.length - 1].source
               this.setState({ currentPanoSource: { uri: luckyPicLink } })
-              this.setState({ lengendTitle: `from flikr.com by ""` })
+              this.setState({ lengendTitle: `from flikr.com by "${luckyPicInfo.ownername}"` })
               this.setState({ lengendContent: luckyPicInfo.title })
               this._cachedPanoSources.push({ index: luckyPic, uri: luckyPicLink })
             } else {
