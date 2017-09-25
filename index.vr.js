@@ -12,7 +12,7 @@ import {
 import axios from 'axios'
 
 const FLICKR_API_BASE_URL = 'https://api.flickr.com/services/rest/'
-const FLICKR_API_KEY = '3699274559f630654bae279694f54314'
+const FLICKR_API_KEY = 'fc6a98fd8b142eec89de8eb42e1fba89'
 
 const $styleTpl = {
   palette: {
