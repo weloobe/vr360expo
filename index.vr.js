@@ -103,7 +103,7 @@ export default class vrpanoexpo extends React.Component {
       isLegendVisible: true,
       notiMessage: 'loading state ...',
       lengendTitle: 'welcome, say hello to the world!',
-      lengendContent: 'use these side buttons to navigate through awesome pictures, published by awesome people.',
+      lengendContent: 'Use these side buttons to navigate through awesome pictures, published by awesome people. Dragging around a 360° picture with your mouse on the panoramic page.',
       currentPanoSource: asset('chess-world.jpg')
     }
     this._panoGallery = null
