@@ -81,16 +81,16 @@ const $styles = StyleSheet.create({
   rowBoxCenter: StyleSheet.flatten([$styleTpl.rowBox, { justifyContent: 'center' }]),
   textCenter: $styleTpl.textCenter,
   btn: $styleTpl.btn,
-  btnRounded: StyleSheet.flatten([$styleTpl.btn, { 
-    borderRadius: 0.5, 
-    width: 0.2, 
-    height: 0.2 
+  btnRounded: StyleSheet.flatten([$styleTpl.btn, {
+    borderRadius: 0.5,
+    width: 0.2,
+    height: 0.2
   }]),
   btnText: StyleSheet.flatten([$styleTpl.textCenter, { fontWeight: '600' }])
 })
 
 export default class vrpanoexpo extends React.Component {
-  constructor() {
+  constructor () {
     super()
 
     this.state = {
@@ -110,7 +110,7 @@ export default class vrpanoexpo extends React.Component {
     this._cachedPanoSources = []
   }
 
-  _notify = (msg, type) => {
+  _notify (msg, type) {
     switch (type) {
       case 'error': this.state.notiBoxColor = $styleTpl.palette.red
         break
@@ -120,16 +120,16 @@ export default class vrpanoexpo extends React.Component {
         break
       default: this.state.notiBoxColor = $styleTpl.palette.black
     }
-    
+
     this.setState({notiMessage: msg})
     if (!this.state.isNotiVisible) this.setState({ isNotiVisible: true })
   }
 
-  _hideNotifier = () => {
+  _hideNotifier () {
     if (this.state.isNotiVisible) this.setState({ isNotiVisible: false })
   }
 
-  _fetchPanoImages = async () => {
+  async _fetchPanoImages () {
     this._notify('loading panoramic gallery ...')
 
     try {
@@ -145,7 +145,7 @@ export default class vrpanoexpo extends React.Component {
         nojsoncallback: 1
       }
       let response = await axios.get(FLICKR_API_BASE_URL, {
-          params: reqParams
+        params: reqParams
       })
 
       if (response.data.stat === 'ok') {
@@ -160,7 +160,7 @@ export default class vrpanoexpo extends React.Component {
           if (photoPages >= 3 && (luckyPage = Math.floor(Math.random() * photoPages - 1)) !== 1) {
             reqParams.page = luckyPage
             response = await axios.get(FLICKR_API_BASE_URL, {
-                params: reqParams
+              params: reqParams
             })
           }
           this._panoGallery = response.data.photos
@@ -180,102 +180,102 @@ export default class vrpanoexpo extends React.Component {
     }
   }
 
-  _fetchRandomPanoImageURI = async () => {
+  async _fetchRandomPanoImageURI () {
     let panoGallery = this._panoGallery
     this._notify('loading next image ...')
 
     if (panoGallery) {
-      let luckyPic = Math.floor(Math.random() * panoGallery.photo.length);
+      let luckyPic = Math.floor(Math.random() * panoGallery.photo.length)
       let catchedPanoSource = this._cachedPanoSources.find((source) => source.index === luckyPic)
-      
-      if (!catchedPanoSource) {
-        let luckyPicInfo = panoGallery.photo[luckyPic];
-          try {
-            let response = await axios.get(FLICKR_API_BASE_URL, {
-              params: {
-                method: 'flickr.photos.getSizes',
-                api_key: FLICKR_API_KEY,
-                photo_id: luckyPicInfo.id,
-                format: 'json',
-                nojsoncallback: 1
-              }
-            })
 
-            if (response.data.stat === 'ok') {
-              let luckyPicSizes = response.data.sizes
-              // get largest image's size (can be very big for some and then timemore loading)
-              // That said `three.js` seems to resize automatically big image (width > 8192px)
-              let luckyPicLink = luckyPicSizes.size[luckyPicSizes.size.length - 1].source
-              this.setState({ currentPanoSource: { uri: luckyPicLink } })
-              this.setState({ lengendTitle: `from flikr.com by "${luckyPicInfo.ownername}"` })
-              this.setState({ lengendContent: luckyPicInfo.title })
-              this._cachedPanoSources.push({ index: luckyPic, uri: luckyPicLink })
-            } else {
-              console.error('FlickrAPI:getSizes: Oops, request error! ', response.data.message)
-              this._notify('Oops, fetching picture error, please try again!', 'error')
+      if (!catchedPanoSource) {
+        let luckyPicInfo = panoGallery.photo[luckyPic]
+        try {
+          let response = await axios.get(FLICKR_API_BASE_URL, {
+            params: {
+              method: 'flickr.photos.getSizes',
+              api_key: FLICKR_API_KEY,
+              photo_id: luckyPicInfo.id,
+              format: 'json',
+              nojsoncallback: 1
             }
-            console.log(response.data)
-          } catch (err) {
-            console.error('FlickrAPI:getSizes: Oops, connexion error! ', err)
-            this._notify('Oops, connexion error!', 'error')
+          })
+
+          if (response.data.stat === 'ok') {
+            let luckyPicSizes = response.data.sizes
+            // get largest image's size (can be very big for some and then timemore loading)
+            // That said `three.js` seems to resize automatically big image (width > 8192px)
+            let luckyPicLink = luckyPicSizes.size[luckyPicSizes.size.length - 1].source
+            this.setState({ currentPanoSource: { uri: luckyPicLink } })
+            this.setState({ lengendTitle: `from flikr.com by "${luckyPicInfo.ownername}"` })
+            this.setState({ lengendContent: luckyPicInfo.title })
+            this._cachedPanoSources.push({ index: luckyPic, uri: luckyPicLink })
+          } else {
+            console.error('FlickrAPI:getSizes: Oops, request error! ', response.data.message)
+            this._notify('Oops, fetching picture error, please try again!', 'error')
           }
+          console.log(response.data)
+        } catch (err) {
+          console.error('FlickrAPI:getSizes: Oops, connexion error! ', err)
+          this._notify('Oops, connexion error!', 'error')
+        }
       } else {
         this.setState({ currentPanoSource: { uri: catchedPanoSource.uri } })
       }
     } else this._notify('Hola, waiting gallery to be loaded, maybe connexion issue!', 'warning')
   }
 
-  _displayHomePano = () => { 
+  _displayHomePano () {
     this._fetchPanoImages()
     if (!this.state.isIntroVisible) this.setState({ isIntroVisible: true })
     this.setState({ btnHomeColor: $styleTpl.palette.green })
-    this.setState({ currentPanoSource: asset('chess-world.jpg'), })
-    this.setState({ lengendTitle: 'say hello to the world!', })
+    this.setState({ currentPanoSource: asset('chess-world.jpg') })
+    this.setState({ lengendTitle: 'say hello to the world!' })
     this.setState({ lengendContent: 'use these side buttons to navigate through awesome pictures, published by awesome people.' })
   }
 
-  _displayNewPano = () => { 
+  _displayNewPano () {
     this._fetchRandomPanoImageURI()
     this.setState({ btnPlayColor: $styleTpl.palette.green })
     if (this.state.isIntroVisible) this.setState({ isIntroVisible: false })
   }
 
-  _manageInfoBox = () => { 
+  _manageInfoBox () {
     this._hideNotifier()
     this.setState({ isLegendVisible: !this.state.isLegendVisible })
   }
 
-  componentWillMount() {
+  componentWillMount () {
     this._fetchPanoImages()
   }
 
-  render() {
+  render () {
     return (
       <View>
-        <Pano source={this.state.currentPanoSource} onLoadEnd={() => {this._hideNotifier()}}/>
+        <Pano source={this.state.currentPanoSource} onLoadEnd={() => { this._hideNotifier() }} />
         <View
           style={[$styles.introBox, {
             transform: [{ translate: [0, 0, -3.5] }],
             layoutOrigin: [0.5, 0.5],
-            display: this.state.isIntroVisible ? 'flex': 'none'
+            display: this.state.isIntroVisible ? 'flex' : 'none'
           }]}>
           <Text style={[$styles.textCenter, {
             fontSize: 0.3,
             fontWeight: '400'
           }]}>
             welcome to vr-pano-expo
-          </Text> 
+          </Text>
           <Text style={[$styles.textCenter, {
-            fontSize: 0.2,
+            fontSize: 0.2
           }]}>
             &gt; explore panoramic pictures in virtual reality mode !
-          </Text> 
+          </Text>
           <Text style={[$styles.textCenter, {
             fontSize: 0.15,
             fontWeight: '400'
           }]}>
-            &lt; made with love by "weloobe" &gt; 
-          </Text> 
+            &lt; made with love by "weloobe" &gt;
+          </Text>
         </View>
         <View style={[$styles.rowBoxCenter, {
           layoutOrigin: [0.5, 0.5],
@@ -284,57 +284,57 @@ export default class vrpanoexpo extends React.Component {
           transform: [{ translate: [0.5, 0, -2.1] }]
         }]}>
           <VrButton
-            style={[$styles.btnRounded, { 
-              backgroundColor: this.state.btnHomeColor,
-              }]}
+            style={[$styles.btnRounded, {
+              backgroundColor: this.state.btnHomeColor
+            }]}
             onEnter={() => this.setState({ btnHomeColor: $styleTpl.palette.purpleTrans })}
             onExit={() => this.setState({ btnHomeColor: $styleTpl.btn.backgroundColor })}
-            onClick={ this._displayHomePano }
+            onClick={() => this._displayHomePano()}
           >
-            <Text style={ $styles.btnText }>
+            <Text style={$styles.btnText}>
               H
             </Text>
           </VrButton>
           <VrButton
-            style={[$styles.btnRounded, { 
-              backgroundColor: this.state.btnPlayColor,
-              }]}
+            style={[$styles.btnRounded, {
+              backgroundColor: this.state.btnPlayColor
+            }]}
             onEnter={() => this.setState({ btnPlayColor: $styleTpl.palette.purpleTrans })}
             onExit={() => this.setState({ btnPlayColor: $styleTpl.btn.backgroundColor })}
-            onClick={ this._displayNewPano }
+            onClick={() => this._displayNewPano()}
           >
-            <Text style={ $styles.btnText }>
+            <Text style={$styles.btnText}>
               &gt;
             </Text>
           </VrButton>
           <VrButton
-            style={[$styles.btnRounded, { 
-              backgroundColor: this.state.btnInfoColor,
-              }]}
+            style={[$styles.btnRounded, {
+              backgroundColor: this.state.btnInfoColor
+            }]}
             onEnter={() => this.setState({ btnInfoColor: $styleTpl.palette.purpleTrans })}
             onExit={() => this.setState({ btnInfoColor: $styleTpl.palette.blueTrans })}
-            onClick={ this._manageInfoBox }
+            onClick={() => this._manageInfoBox()}
           >
-            <Text style={ $styles.btnText }>
+            <Text style={$styles.btnText}>
               i
             </Text>
           </VrButton>
           <View style={[$styles.columnBox]}>
             <View style={[$styles.notiBox, {
-              display: this.state.isNotiVisible ? 'flex': 'none',
+              display: this.state.isNotiVisible ? 'flex' : 'none',
               backgroundColor: this.state.notiBoxColor
             }]}>
-              <Text style={{ 
+              <Text style={{
                 fontWeight: '400',
                 fontSize: 0.08
               }}>
                 {this.state.notiMessage}
               </Text>
             </View>
-            <View style={[$styles.legendBox, {display: this.state.isLegendVisible ? 'flex': 'none'}]}>
-              <Text style={{ 
-                color: $styleTpl.palette.blue, 
-                fontSize: 0.06, 
+            <View style={[$styles.legendBox, {display: this.state.isLegendVisible ? 'flex' : 'none'}]}>
+              <Text style={{
+                color: $styleTpl.palette.blue,
+                fontSize: 0.06
               }}>
                 { this.state.lengendTitle }
               </Text>
@@ -348,7 +348,7 @@ export default class vrpanoexpo extends React.Component {
           </View>
         </View>
       </View>
-    );
+    )
   }
 }
 
