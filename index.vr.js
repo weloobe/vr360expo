@@ -89,7 +89,7 @@ const $styles = StyleSheet.create({
   btnText: StyleSheet.flatten([$styleTpl.textCenter, { fontWeight: '600' }])
 })
 
-export default class vrpanoexpo extends React.Component {
+export default class vr360expo extends React.Component {
   constructor () {
     super()
 
@@ -263,7 +263,7 @@ export default class vrpanoexpo extends React.Component {
             fontSize: 0.3,
             fontWeight: '400'
           }]}>
-            welcome to vr-pano-expo
+            welcome to vr360expo
           </Text>
           <Text style={[$styles.textCenter, {
             fontSize: 0.2
@@ -352,4 +352,4 @@ export default class vrpanoexpo extends React.Component {
   }
 }
 
-AppRegistry.registerComponent('vrpanoexpo', () => vrpanoexpo)
+AppRegistry.registerComponent('vr360expo', () => vr360expo)
