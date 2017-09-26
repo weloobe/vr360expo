@@ -4,6 +4,8 @@ import {
   StyleSheet,
   asset,
   Pano,
+  Sound,
+  MediaPlayerState,
   Text,
   View,
   VrButton
@@ -39,8 +41,8 @@ const $styleTpl = {
   },
   btn: {
     backgroundColor: 'rgba(10, 10, 10, 0.7)',
-    borderColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 0.03,
+    borderColor: 'rgba(255, 255, 255, 0.75)',
+    borderWidth: 0.025,
     margin: 0.03
   },
   rowBox: {
@@ -83,8 +85,8 @@ const $styles = StyleSheet.create({
   btn: $styleTpl.btn,
   btnRounded: StyleSheet.flatten([$styleTpl.btn, {
     borderRadius: 0.5,
-    width: 0.2,
-    height: 0.2
+    width: 0.17,
+    height: 0.17
   }]),
   btnText: StyleSheet.flatten([$styleTpl.textCenter, { fontWeight: '600' }])
 })
@@ -94,19 +96,22 @@ export default class vr360expo extends React.Component {
     super()
 
     this.state = {
-      btnPlayColor: $styleTpl.btn.backgroundColor,
+      btnPlayColor: $styleTpl.palette.orangeTrans,
       btnHomeColor: $styleTpl.btn.backgroundColor,
+      btnSoundColor: $styleTpl.btn.backgroundColor,
       btnInfoColor: $styleTpl.palette.blueTrans,
       notiBoxColor: $styleTpl.palette.black,
       isIntroVisible: true,
       isNotiVisible: false,
       isLegendVisible: true,
       isInitialLoading: true,
+      isSoundPlaying: true,
       notiMessage: 'loading state ...',
       lengendTitle: 'welcome, say hello to the world!',
       lengendContent: 'Use these side buttons to navigate through awesome pictures, published by awesome people. Dragging around a 360° picture with your mouse on the panoramic page.',
       currentPanoSource: asset('chess-world.jpg'),
-      nextPanoImage: {}
+      nextPanoImage: {},
+      soundState: new MediaPlayerState({ autoPlay: true })
     }
     this._panoGallery = null
     this._cachedPanoSources = []
@@ -248,6 +253,16 @@ export default class vr360expo extends React.Component {
     } else this.setState({isInitialLoading: false})
   }
 
+  _changeSoundStatus () {
+    if (this.state.isSoundPlaying) {
+      this.state.soundState.pause()
+      this.setState({ isSoundPlaying: false })
+    } else {
+      this.state.soundState.play()
+      this.setState({ isSoundPlaying: true })
+    }
+  }
+
   _displayHomePano () {
     this._fetchPanoImages()
     if (!this.state.isIntroVisible) this.setState({ isIntroVisible: true })
@@ -275,15 +290,15 @@ export default class vr360expo extends React.Component {
   render () {
     return (
       <View>
+        <Sound source={asset('no-time.mp3')} playerState={this.state.soundState} loop />
         <Pano source={this.state.currentPanoSource} onLoadEnd={() => { this._statePanoLoaded() }} />
         {/* below  pano is just used for futur equirectangular image preloading purpose */}
         <Pano style={{display: 'none'}} source={this.state.nextPanoImage.source || this.state.currentPanoSource} />
-        <View
-          style={[$styles.introBox, {
-            transform: [{ translate: [0, 0, -3.5] }],
-            layoutOrigin: [0.5, 0.5],
-            display: this.state.isIntroVisible ? 'flex' : 'none'
-          }]}>
+        <View style={[$styles.introBox, {
+          transform: [{ translate: [0, 0, -3.5] }],
+          layoutOrigin: [0.5, 0.5],
+          display: this.state.isIntroVisible ? 'flex' : 'none'
+        }]}>
           <Text style={[$styles.textCenter, {
             fontSize: 0.3,
             fontWeight: '400'
@@ -322,10 +337,22 @@ export default class vr360expo extends React.Component {
           </VrButton>
           <VrButton
             style={[$styles.btnRounded, {
+              backgroundColor: this.state.btnSoundColor
+            }]}
+            onEnter={() => this.setState({ btnSoundColor: $styleTpl.palette.purpleTrans })}
+            onExit={() => this.setState({ btnSoundColor: $styleTpl.btn.backgroundColor })}
+            onClick={() => this._changeSoundStatus()}
+          >
+            <Text style={$styles.btnText}>
+              S
+            </Text>
+          </VrButton>
+          <VrButton
+            style={[$styles.btnRounded, {
               backgroundColor: this.state.btnPlayColor
             }]}
             onEnter={() => this.setState({ btnPlayColor: $styleTpl.palette.purpleTrans })}
-            onExit={() => this.setState({ btnPlayColor: $styleTpl.btn.backgroundColor })}
+            onExit={() => this.setState({ btnPlayColor: $styleTpl.palette.orangeTrans })}
             onClick={() => this._displayNewPano()}
           >
             <Text style={$styles.btnText}>
