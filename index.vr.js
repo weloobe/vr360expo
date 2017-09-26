@@ -264,9 +264,11 @@ export default class vr360expo extends React.Component {
   }
 
   _displayHomePano () {
+    this.setState({ nextPanoImage: {} })
     this._fetchPanoImages()
     if (!this.state.isIntroVisible) this.setState({ isIntroVisible: true })
     this.setState({ btnHomeColor: $styleTpl.palette.green })
+    this.setState({ isInitialLoading: true })
     this.setState({ currentPanoSource: asset('chess-world.jpg') })
     this.setState({ lengendTitle: 'say hello to the world!' })
     this.setState({ lengendContent: 'use these side buttons to navigate through awesome pictures, published by awesome people.' })
