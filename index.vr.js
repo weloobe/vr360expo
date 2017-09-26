@@ -101,6 +101,7 @@ export default class vr360expo extends React.Component {
       isIntroVisible: true,
       isNotiVisible: false,
       isLegendVisible: true,
+      isInitialLoading: true,
       notiMessage: 'loading state ...',
       lengendTitle: 'welcome, say hello to the world!',
       lengendContent: 'Use these side buttons to navigate through awesome pictures, published by awesome people. Dragging around a 360° picture with your mouse on the panoramic page.',
@@ -241,6 +242,12 @@ export default class vr360expo extends React.Component {
     } else this._notify('Hola, waiting gallery to be loaded, maybe connexion issue!', 'warning')
   }
 
+  _statePanoLoaded () {
+    if (!this.state.isInitialLoading) {
+      this._hideNotifier()
+    } else this.setState({isInitialLoading: false})
+  }
+
   _displayHomePano () {
     this._fetchPanoImages()
     if (!this.state.isIntroVisible) this.setState({ isIntroVisible: true })
@@ -268,9 +275,9 @@ export default class vr360expo extends React.Component {
   render () {
     return (
       <View>
-        <Pano source={this.state.currentPanoSource} onLoadEnd={() => { this._hideNotifier() }} />
+        <Pano source={this.state.currentPanoSource} onLoadEnd={() => { this._statePanoLoaded() }} />
         {/* below  pano is just used for futur equirectangular image preloading purpose */}
-        <Pano style={{display: 'none'}} source={this.state.nextPanoImage.source || this.state.currentPanoSource} onLoadEnd={() => { this._hideNotifier() }} />
+        <Pano style={{display: 'none'}} source={this.state.nextPanoImage.source || this.state.currentPanoSource} />
         <View
           style={[$styles.introBox, {
             transform: [{ translate: [0, 0, -3.5] }],
