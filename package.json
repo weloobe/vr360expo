@@ -29,5 +29,7 @@
   },
   "jest": {
     "preset": "react-vr"
-  }
+  },
+  "author": "tnga <devtnga@gmail.com> (https://weloobe.com/)",
+  "license": "MIT"
 }
