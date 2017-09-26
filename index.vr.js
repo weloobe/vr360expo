@@ -104,12 +104,14 @@ export default class vr360expo extends React.Component {
       notiMessage: 'loading state ...',
       lengendTitle: 'welcome, say hello to the world!',
       lengendContent: 'Use these side buttons to navigate through awesome pictures, published by awesome people. Dragging around a 360° picture with your mouse on the panoramic page.',
-      currentPanoSource: asset('chess-world.jpg')
+      currentPanoSource: asset('chess-world.jpg'),
+      nextPanoImage: {}
     }
     this._panoGallery = null
     this._cachedPanoSources = []
   }
 
+  // use to show notifcation box depending of message's type
   _notify (msg, type) {
     switch (type) {
       case 'error': this.state.notiBoxColor = $styleTpl.palette.red
@@ -125,10 +127,12 @@ export default class vr360expo extends React.Component {
     if (!this.state.isNotiVisible) this.setState({ isNotiVisible: true })
   }
 
+  // use to hide notification box
   _hideNotifier () {
     if (this.state.isNotiVisible) this.setState({ isNotiVisible: false })
   }
 
+  // use to randomly fetch equirectangular images informations to initialize the gallery
   async _fetchPanoImages () {
     this._notify('loading panoramic gallery ...')
 
@@ -164,6 +168,7 @@ export default class vr360expo extends React.Component {
             })
           }
           this._panoGallery = response.data.photos
+          this._fetchRandomPanoImageURI() // preload the futur equirectangular image to show
           this._notify('panoramic gallery loaded, you can now start!', 'info')
         } else {
           console.warn('FlickrAPI:search: Humm, empty data fetched!')
@@ -180,11 +185,19 @@ export default class vr360expo extends React.Component {
     }
   }
 
+  // use to randomly get current equirectangular image's uri to show and preload next one
   async _fetchRandomPanoImageURI () {
     let panoGallery = this._panoGallery
     this._notify('loading next image ...')
 
     if (panoGallery) {
+      // use waiting preloaded equirectangular image
+      if (Object.keys(this.state.nextPanoImage).length !== 0) {
+        this.setState({ currentPanoSource: this.state.nextPanoImage.source })
+        this.setState({ lengendTitle: this.state.nextPanoImage.title })
+        this.setState({ lengendContent: this.state.nextPanoImage.content })
+      }
+      // try to get next random image to preload and cache
       let luckyPic = Math.floor(Math.random() * panoGallery.photo.length)
       let catchedPanoSource = this._cachedPanoSources.find((source) => source.index === luckyPic)
 
@@ -206,9 +219,12 @@ export default class vr360expo extends React.Component {
             // get largest image's size (can be very big for some and then timemore loading)
             // That said `three.js` seems to resize automatically big image (width > 8192px)
             let luckyPicLink = luckyPicSizes.size[luckyPicSizes.size.length - 1].source
-            this.setState({ currentPanoSource: { uri: luckyPicLink } })
-            this.setState({ lengendTitle: `from flikr.com by "${luckyPicInfo.ownername}"` })
-            this.setState({ lengendContent: luckyPicInfo.title })
+            // next equirectangular image is preloaded for better latency performation when will become current
+            this.setState({ nextPanoImage: {
+              source: {uri: luckyPicLink},
+              title: `from flikr.com by "${luckyPicInfo.ownername}"`,
+              content: luckyPicInfo.title
+            }})
             this._cachedPanoSources.push({ index: luckyPic, uri: luckyPicLink })
           } else {
             console.error('FlickrAPI:getSizes: Oops, request error! ', response.data.message)
@@ -253,6 +269,8 @@ export default class vr360expo extends React.Component {
     return (
       <View>
         <Pano source={this.state.currentPanoSource} onLoadEnd={() => { this._hideNotifier() }} />
+        {/* below  pano is just used for futur equirectangular image preloading purpose */}
+        <Pano style={{display: 'none'}} source={this.state.nextPanoImage.source || this.state.currentPanoSource} onLoadEnd={() => { this._hideNotifier() }} />
         <View
           style={[$styles.introBox, {
             transform: [{ translate: [0, 0, -3.5] }],
